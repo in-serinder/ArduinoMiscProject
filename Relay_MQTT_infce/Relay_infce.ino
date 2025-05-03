@@ -19,6 +19,7 @@ const char *MQTT_TOPIC = "Relay/Server_Master";
 
 WiFiClient wc;
 PubSubClient pc(wc);
+void Relay_NO_swich(int sw);
 
 void MQTTCallBack(char *topic, byte *payload, unsigned int len)
 {
@@ -48,13 +49,13 @@ void MQTTCallBack(char *topic, byte *payload, unsigned int len)
 
   if (str == "NO")
   {
-    Relay_NO_swich(true);
+    Relay_NO_swich(1);
     Serial.println("Command--" + str);
   }
 
   if (str == "NC")
   {
-    Relay_NO_swich(false);
+    Relay_NO_swich(0);
     Serial.println("Command--" + str);
   }
 }
@@ -100,23 +101,29 @@ uint8_t MQTT_connect()
 
 void RelayStatus()
 {
-  String status = "Power: " + String(digitalRead(Relay) ? "NC" : "NO") + " /n/t Last:" + ReadData();
+  String status = "Power: " + String(!digitalRead(Relay) ? "NO" : "NC") + "  Last: " + (ReadData() ? "NO" : "NC") + " Status Code: " + ReadData();
+  LED_Flash(30);
   Serial.println(status);
   pc.publish(MQTT_TOPIC, status.c_str());
 }
 
-// NO 0 NC 1
+// NO 1 NC 0
 // Normally Open&Normally Close
-void Relay_NO_swich(bool sw)
+void Relay_NO_swich(int sw)
 {
-  digitalWrite(Relay, sw);
-  WriteData(sw ? 1 : 0);
+  Serial.println("sw Submit: " + String(sw));
+  digitalWrite(Relay, !sw);
+  digitalWrite(LED, !sw);
+  String state = (sw == 1) ? "NO" : "NC";
+  pc.publish(MQTT_TOPIC, ("Relay- " + state).c_str());
+  WriteData(sw);
 }
 
 void WriteData(int sw)
 {
   EEPROM.write(0, sw);
   EEPROM.commit();
+  Serial.println("Write: " + String(sw) + " Read: " + String(EEPROM.read(0)));
 }
 
 uint8_t ReadData()
@@ -136,21 +143,28 @@ void LED_Flash(int hz)
   }
 }
 
+void initialization()
+{
+  pinMode(Relay, OUTPUT);
+  pinMode(LED, OUTPUT);
+
+  int initialState = ReadData();
+  digitalWrite(Relay, !initialState);
+  digitalWrite(LED, !initialState);
+  Serial.begin(9600);
+}
+
 ////////////////////////////////////////////////////////////
 void setup()
 {
+  EEPROM.begin(1024);
+  initialization();
   // MQTT
   pc.setServer(MQTT_SERVER_IP, MQTT_PORT);
 
   //
-  pinMode(Relay, OUTPUT);
-  pinMode(LED, OUTPUT);
-  Serial.begin(9600);
-  //
   Wifi_connect();
   pc.connect(WiFi.macAddress().c_str());
-  //
-  EEPROM.begin(1024);
 }
 
 void loop()
@@ -176,7 +190,7 @@ void loop()
       pc.loop();
     }
   }
-
+  digitalWrite(LED, !ReadData());
   delay(2000);
 }
 
