@@ -16,7 +16,7 @@
 
 > MQTT_TOPIC = "Topic name";
 
-### Fetures
+### features
 ---
 Requires internet connection(_WIFI_) and connection to the MQTT server. 
 - Serial baud rate is ` 9600 ` with debug output. 
