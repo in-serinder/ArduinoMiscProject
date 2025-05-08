@@ -27,29 +27,24 @@ void setup()
   Serial.println(__TIME__);
 
   // INIT Time
-  RtcDateTime now = Rtc.GetDateTime();
-  if (Rtc.GetIsRunning() && (Rtc.GetDateTime() < now))
-  {
-    if (Rtc.GetIsWriteProtected())
-    {
-      Rtc.SetIsWriteProtected(false);
-      SetDs1302Date(compiled);
-    }
-    else
-    {
-      SetDs1302Date(compiled);
-    }
-  }
-  else
-  {
-    Rtc.SetIsRunning(true);
-    SetDs1302Date(compiled);
-  }
+  // If u want use compiled time
+  //  RtcDateTime now = Rtc.GetDateTime();
+  //  if(Rtc.GetIsRunning()&&(Rtc.GetDateTime()<now)){
+  //      if (Rtc.GetIsWriteProtected()) {
+  //        Rtc.SetIsWriteProtected(false);
+  //        SetDs1302Date(compiled);
+  //      }else{
+  //        SetDs1302Date(compiled);
+  //      }
+
+  // }else{
+  //   Rtc.SetIsRunning(true);
+  //   SetDs1302Date(compiled);
+  // }
 }
 
 void loop()
 {
-  // put your main code here, to run repeatedly:
   RtcDateTime now = Rtc.GetDateTime();
   // uint16_t time = now.Hour()*100 + now.Minute();
   // tmdisplay.showNumberDecEx(time, 0b00000010);
@@ -58,7 +53,7 @@ void loop()
   // delay(1000);
 
   // tmdisplay.showNumberDecEx(time, 0b00001000);
-  Serial.println("Date:" + String(now.Hour()) + String(now.Minute()));
+  Serial.printf("Rtc-Get: y:%d m:%d d:%d h:%d m:%d S:%d\n", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second());
   show_clock(now.Hour(), now.Minute(), true);
   delay(1000);
   show_clock(now.Hour(), now.Minute(), false);
