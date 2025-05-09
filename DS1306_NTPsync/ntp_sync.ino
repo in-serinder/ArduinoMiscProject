@@ -6,9 +6,9 @@
 #include <ThreeWire.h>
 #include <RtcDS1302.h>
 
-#define DS_CLK 5
-#define DS_DATA 4
-#define DS_RST 2
+#define DS_CLK D0
+#define DS_DATA D1
+#define DS_RST D2
 
 const char *WIFI_SSID = "SSID";
 const char *WIFI_PASSWORD = "PASSWORD";
@@ -49,7 +49,14 @@ void loop()
   RtcDateTime now = Rtc.GetDateTime();
   Serial.printf("Rtc-Get: y:%d m:%d d:%d h:%d m:%d S:%d\n", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second());
 
+  if (!Rtc.IsDateTimeValid())
+  {
+    Serial.println("Error Date!");
+  }
+
   delay(1000);
+
+  Serial.println("---------------------------------------------");
 }
 
 void WIFI_Connect()
