@@ -29,6 +29,7 @@ Requires internet connection(_WIFI_) and connection to the MQTT server.
 - ` ~status `: Returns the current status of the relay.
 - ` ~NO `: Sets the relay to ` Normally Open ` mode. LED is on when the relay is off.
 - ` ~NC `: Sets the relay to ` Normally Close ` mode. LED is off when the relay is on.
+- ` ~SW `: Used for short-term switch devices (such as desktop power buttons), the relay will temporarily close and then disconnect again after 800 milliseconds
 
 ### Results
 --- 

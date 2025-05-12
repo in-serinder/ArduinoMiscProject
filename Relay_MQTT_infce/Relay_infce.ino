@@ -58,6 +58,14 @@ void MQTTCallBack(char *topic, byte *payload, unsigned int len)
     Relay_NO_swich(0);
     Serial.println("Command--" + str);
   }
+
+  if (str == "SW")
+  {
+    Relay_NO_swich(1);
+    delay(800);
+    Relay_NO_swich(0);
+    Serial.println("Command--" + str);
+  }
 }
 
 void Wifi_connect()
