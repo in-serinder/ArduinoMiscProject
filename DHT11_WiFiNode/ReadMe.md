@@ -20,7 +20,7 @@
 ---
 Requires internet connection(_WIFI_) and connection to the MQTT server. 
 - Serial baud rate is ` 9600 ` with debug output. 
-- Uses ` ESP-01/01S Relay v4.0 relay ` module.
+- Uses ` ESP-01/01S DHT11 ` module.
 - Supports ` DHT11 ` temperature and humidity sensor.
 
 ### MQTT Commands
