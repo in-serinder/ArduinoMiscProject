@@ -1,5 +1,5 @@
-# Relay_MQTT
-` Relay_MQTT ` is a simple program that allows you to get temperature and humidity data from the DHT11 sensor and send it to an MQTT server.
+# DHT11_WIFINode
+`DHT11_WIFINode` is a simple program that allows you to get temperature and humidity data from the DHT11 sensor and send it to an MQTT server.
 ### arguments
 ---
 > WIFI_SSID = "WiFi ssid";
