@@ -31,9 +31,9 @@
 // #define Buzzer D8
 
 const char *WIFI_SSID = "2.4GHZ";
-const char *WIFI_PASSWORD = "320724fuck";
+const char *WIFI_PASSWORD = "pwd";
 
-const char *MQTT_SERVER_IP = "8.130.191.142";
+const char *MQTT_SERVER_IP = "broker";
 const int MQTT_PORT = 1883;
 const char *MQTT_USER = "Relay";
 const char *MQTT_PASSWORD = "password";
@@ -41,12 +41,12 @@ const char *MQTT_PASSWORD = "password";
 const char *MQTT_TOPIC = "Relay/Server_Master";
 const char *DHT11_TOPIC = "Temperature/Node1";
 
-const u32_t ZONE = 28800;  // U8
+const u32_t ZONE = 28800; // U8
 
-const char *NTP_SERVERS[] = { "ntp.pool.org",
-                              "cn.pool.ntp.org",
-                              "time.windows.com",
-                              "ntp.ntsc.ac.cn" };
+const char *NTP_SERVERS[] = {"ntp.pool.org",
+                             "cn.pool.ntp.org",
+                             "time.windows.com",
+                             "ntp.ntsc.ac.cn"};
 
 IPAddress ip;
 WiFiUDP ntpUDP;
@@ -69,47 +69,58 @@ int timecount = 0;
 float temperature, humidity;
 boolean warnFlag = false;
 
-void MQTTCallBack(char *topic, byte *payload, unsigned int len) {
+void MQTTCallBack(char *topic, byte *payload, unsigned int len)
+{
   // Serial.println("data from - " + String(topic) + " ");
   String str = "", msg = "";
   uint8_t pos = 0;
   float dhtvalue = 0;
   boolean istemperature = false;
-  for (unsigned int i = 0; i < len; i++) {
+  for (unsigned int i = 0; i < len; i++)
+  {
     // Serial.print((char)payload[i]);
     msg += String((char)payload[i]);
   }
   Serial.println();
   Serial.println("------------------------");
 
-
-  if (msg[0] == '>' && (!msg.isEmpty())) {
+  if (msg[0] == '>' && (!msg.isEmpty()))
+  {
     tempMessage = true;
     istemperature = (msg.substring(1, 2) == "T") ? true : false;
     dhtvalue = atoi(msg.substring(2).c_str());
-  } else {
+  }
+  else
+  {
     tempMessage = false;
   }
 
-  if (msg[0] == '~' && (!msg.isEmpty()) && (msg[0] != '>')) {
-    pos = atoi((msg.substring(1, 2)).c_str());  //继电器号
+  if (msg[0] == '~' && (!msg.isEmpty()) && (msg[0] != '>'))
+  {
+    pos = atoi((msg.substring(1, 2)).c_str()); // 继电器号
     str = msg.substring(2);
   }
 
-
-
   // 温度获取,错误时数值处于253
-  if (istemperature) {
-    if (dhtvalue >= 253) {
+  if (istemperature)
+  {
+    if (dhtvalue >= 253)
+    {
       pc.publish(DHT11_TOPIC, "~GET_TEMP");
-    } else {
+    }
+    else
+    {
       temperature = dhtvalue;
     }
-
-  } else {
-    if (dhtvalue >= 253) {
+  }
+  else
+  {
+    if (dhtvalue >= 253)
+    {
       pc.publish(DHT11_TOPIC, "~GET_HUM");
-    } else {
+    }
+    else
+    {
       humidity = dhtvalue;
     }
   }
@@ -119,22 +130,26 @@ void MQTTCallBack(char *topic, byte *payload, unsigned int len) {
 
   // 继电器相关
   // Main str -> Command
-  if (str == "status" || str == "tatus") {
+  if (str == "status" || str == "tatus")
+  {
     RelayStatus();
     Serial.println("Command--" + str);
   }
 
-  if (str == "NO") {
+  if (str == "NO")
+  {
     Relay_NO_swich(1, pos);
     Serial.println("Command--" + str);
   }
 
-  if (str == "NC") {
+  if (str == "NC")
+  {
     Relay_NO_swich(0, pos);
     Serial.println("Command--" + str);
   }
   // 复位开关
-  if (str == "SW") {
+  if (str == "SW")
+  {
     Relay_NO_swich(1, pos);
     delay(800);
     Relay_NO_swich(0, pos);
@@ -155,14 +170,15 @@ void MQTTCallBack(char *topic, byte *payload, unsigned int len) {
 
 // }
 
-
-void Wifi_connect() {
+void Wifi_connect()
+{
   int count = 0;
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.println("Connect to: \n\tSSID:" + String(WIFI_SSID) + "\n\tPassWord:" + String(WIFI_PASSWORD));
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     Serial.print('.');
     delay(1000);
     count++;
@@ -174,12 +190,14 @@ void Wifi_connect() {
   LED_Flash(20);
 }
 
-uint8_t MQTT_connect() {
+uint8_t MQTT_connect()
+{
   String data = "Hello Relay " + WiFi.macAddress() + " Started";
 
   if (WiFi.status() != WL_CONNECTED)
     return -1;
-  if (!pc.connect(WiFi.macAddress().c_str(), MQTT_USER, MQTT_PASSWORD)) {
+  if (!pc.connect(WiFi.macAddress().c_str(), MQTT_USER, MQTT_PASSWORD))
+  {
     Serial.println("MQTT Readly");
     return -1;
   }
@@ -193,20 +211,20 @@ uint8_t MQTT_connect() {
 
   pc.setCallback(MQTTCallBack);
 
-
   Serial.println("Connect MQTT Server " + String(MQTT_SERVER_IP) + " Success");
 
   // 获取
   pc.publish(DHT11_TOPIC, "~GET_TEMP");
   pc.publish(DHT11_TOPIC, "~GET_HUM");
 
-
   return 1;
 }
 
-void RelayStatus() {
+void RelayStatus()
+{
   String status = "";
-  for (int i = 0; i < 6; i++) {
+  for (int i = 0; i < 6; i++)
+  {
     status += String("Relay" + String(i + 1) + "-Device:" + (RELAY_STATUS[i] ? "NO" : "NC") + " Code:" + String(RELAY_STATUS[i]) + " " + ((i > 2) ? "EX\n" : "IN\n"));
   }
   LED_Flash(30);
@@ -216,28 +234,30 @@ void RelayStatus() {
 
 // NO 1 NC 0
 // Normally Open&Normally Close
-void Relay_NO_swich(int sw, uint8_t pos) {
+void Relay_NO_swich(int sw, uint8_t pos)
+{
   Serial.println("sw Submit: " + String(sw));
 
-  switch (pos) {
-    case 1:
-      digitalWrite(Relay1, !sw);
-      RELAY_STATUS[0, sw];
-      Serial.println("Option : " + String(pos));
-      break;
-    case 2:
-      digitalWrite(Relay2, !sw);
-      RELAY_STATUS[1, sw];
-      Serial.println("Option : " + String(pos));
-      break;
-    case 3:
-      digitalWrite(Relay3, !sw);
-      RELAY_STATUS[2, sw];
-      Serial.println("Option : " + String(pos));
-    default:
-      RELAY_STATUS[pos - 1] = sw ? true : false;
-      pc.publish(MQTT_TOPIC, "RELAYEX");
-      break;
+  switch (pos)
+  {
+  case 1:
+    digitalWrite(Relay1, !sw);
+    RELAY_STATUS[0, sw];
+    Serial.println("Option : " + String(pos));
+    break;
+  case 2:
+    digitalWrite(Relay2, !sw);
+    RELAY_STATUS[1, sw];
+    Serial.println("Option : " + String(pos));
+    break;
+  case 3:
+    digitalWrite(Relay3, !sw);
+    RELAY_STATUS[2, sw];
+    Serial.println("Option : " + String(pos));
+  default:
+    RELAY_STATUS[pos - 1] = sw ? true : false;
+    pc.publish(MQTT_TOPIC, "RELAYEX");
+    break;
   }
   // digitalWrite(Relay,!sw);
   digitalWrite(LED, !sw);
@@ -247,13 +267,16 @@ void Relay_NO_swich(int sw, uint8_t pos) {
   setRelayStatus(pos, sw);
   // WriteData(sw);
 
-  if (sw) {
+  if (sw)
+  {
     tone(Buzzer, 456);
     delay(200);
     tone(Buzzer, 256);
     delay(200);
     noTone(Buzzer);
-  } else {
+  }
+  else
+  {
     tone(Buzzer, 256);
     delay(200);
     tone(Buzzer, 456);
@@ -262,30 +285,37 @@ void Relay_NO_swich(int sw, uint8_t pos) {
   }
 }
 
-void WriteData(int sw, uint8_t pos) {
+void WriteData(int sw, uint8_t pos)
+{
   EEPROM.write(pos, sw);
   EEPROM.commit();
   Serial.println("Write: " + String(sw) + " Read: " + String(EEPROM.read(0)));
 }
 
-void setRelayStatus(uint8_t status, uint8_t pos) {
+void setRelayStatus(uint8_t status, uint8_t pos)
+{
   RELAY_STATUS[pos] = status;
   WriteData(pos, status);
 }
 
-void getRelayStatus() {
-  for (u8_t i = 0; i < 6; i++) {
+void getRelayStatus()
+{
+  for (u8_t i = 0; i < 6; i++)
+  {
     RELAY_STATUS[i] = ReadData(i);
   }
 }
 
-uint8_t ReadData(uint8_t pos) {
+uint8_t ReadData(uint8_t pos)
+{
   return EEPROM.read(pos);
 }
 
-void LED_Flash(int hz) {
+void LED_Flash(int hz)
+{
   uint8_t Ti = (hz / 60) * 1000;
-  for (uint8_t i = 0; i <= hz; i++) {
+  for (uint8_t i = 0; i <= hz; i++)
+  {
     digitalWrite(LED, 1);
     delay(Ti);
     digitalWrite(LED, 0);
@@ -293,7 +323,8 @@ void LED_Flash(int hz) {
   }
 }
 
-void NtpUpdate() {
+void NtpUpdate()
+{
   tc.update();
   Serial.println(tc.getFormattedTime());
   setTime(tc.getEpochTime());
@@ -303,7 +334,8 @@ void NtpUpdate() {
   Serial.printf("Rtc-Get: y:%d m:%d d:%d h:%d m:%d S:%d\n", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second());
 }
 
-void initialization() {
+void initialization()
+{
 
   getRelayStatus();
 
@@ -361,31 +393,43 @@ void initialization() {
 //   tmdisplay.setSegments(digits, 4, 0);
 // }
 
-void sync_relaystatusEtoR() {
-  for (int i = 0; i < 6; i++) {
+void sync_relaystatusEtoR()
+{
+  for (int i = 0; i < 6; i++)
+  {
     RELAY_STATUS[i] = ReadData(i);
   }
 }
 
-void sync_relaystatusRtoE() {
-  for (int i = 0; i < 6; i++) {
+void sync_relaystatusRtoE()
+{
+  for (int i = 0; i < 6; i++)
+  {
     WriteData(i, RELAY_STATUS[i]);
   }
 }
 
-String Fixxint(int value) {
-  if (value < 10) {
-    return "0" + String(value);  // 生成独立的String，如"07"
-  } else {
-    return String(value);  // 生成独立的String，如"12"
+String Fixxint(int value)
+{
+  if (value < 10)
+  {
+    return "0" + String(value); // 生成独立的String，如"07"
+  }
+  else
+  {
+    return String(value); // 生成独立的String，如"12"
   }
 }
 
-String Fixxfloat(float value) {
-  if (value < 10) {
-    return "0" + String(value);  // 生成独立的String，如"07"
-  } else {
-    return String(value);  // 生成独立的String，如"12"
+String Fixxfloat(float value)
+{
+  if (value < 10)
+  {
+    return "0" + String(value); // 生成独立的String，如"07"
+  }
+  else
+  {
+    return String(value); // 生成独立的String，如"12"
   }
 }
 
@@ -399,9 +443,9 @@ String Fixxfloat(float value) {
 //   return buf;
 // }
 
-
 ////////////////////////////////////////////////////////////
-void setup() {
+void setup()
+{
   EEPROM.begin(16);
   Serial.begin(9600);
   initialization();
@@ -413,30 +457,36 @@ void setup() {
   pc.connect(WiFi.macAddress().c_str());
 }
 
-void loop() {
+void loop()
+{
   timecount++;
 
-  if (timecount % 100 == 0) {
+  if (timecount % 100 == 0)
+  {
     pc.publish(DHT11_TOPIC, "~GET_TEMP");
     pc.publish(DHT11_TOPIC, "~GET_HUM");
   }
 
-
-
   sync_relaystatusRtoE();
   RtcDateTime now = Rtc.GetDateTime();
-  if (WiFi.status() != WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED)
+  {
     Serial.println();
     Serial.println("WiFi is break reconnect ... ");
     Wifi_connect();
     // show_clock(07, 21, true);
     // MQTT_connect();
-  } else {
-    if (!pc.connected()) {
+  }
+  else
+  {
+    if (!pc.connected())
+    {
       MQTT_connect();
       // String topic=WiFi.macAddress()+" -Relay_Receive";
       // pc.publish(topic.c_str(),"Hello Guys");
-    } else {
+    }
+    else
+    {
       pc.loop();
     }
 
@@ -467,23 +517,19 @@ void loop() {
   //   warnFlag );
 
   Serial.printf(
-    ">%d%s%s^%s%s%s^%d%d%d^%5s^%5s^%d\n",
-    now.Year(),
-    Fixxint(now.Month()),
-    Fixxint(now.Day()),
-    Fixxint(now.Hour()),
-    Fixxint(now.Minute()),
-    Fixxint(now.Second()),  // 秒补0
-    RELAY_STATUS[3],
-    RELAY_STATUS[4],
-    RELAY_STATUS[5],
-    Fixxfloat(temperature),
-    Fixxfloat(humidity),
-    warnFlag);
-
-
-
-
+      ">%d%s%s^%s%s%s^%d%d%d^%5s^%5s^%d\n",
+      now.Year(),
+      Fixxint(now.Month()),
+      Fixxint(now.Day()),
+      Fixxint(now.Hour()),
+      Fixxint(now.Minute()),
+      Fixxint(now.Second()), // 秒补0
+      RELAY_STATUS[3],
+      RELAY_STATUS[4],
+      RELAY_STATUS[5],
+      Fixxfloat(temperature),
+      Fixxfloat(humidity),
+      warnFlag);
 
   // if(temperature<10||humidity<10){
   //       Serial.printf(">%d%s%d^%d%d%d^%d%d%d^0%2.2f^0%2.2f^%d\n",now.Year(),now.Month(),now.Day(),
