@@ -6,7 +6,7 @@
 
 #define OLED_ADDR 0x3C
 #define OLED_WIDTH 128
-#define OLED_HEIGHT 32
+#define OLED_HEIGHT 64
 
 // DEFAULT
 //  SDA: GPIO 4 (D2)
@@ -16,8 +16,8 @@
 #define DS_DATA D1
 #define DS_RST D2
 
-#define SCL D5
-#define SDA D6
+#define SCL D6
+#define SDA D7
 
 ThreeWire tWire(DS_DATA, DS_CLK, DS_RST);
 
