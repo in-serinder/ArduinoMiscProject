@@ -688,6 +688,7 @@ void NtpUpdate()
   Serial.println(tc.getFormattedTime());
   setTime(tc.getEpochTime());
   RtcDateTime current = RtcDateTime(year(), month(), day(), hour(), minute(), second());
+  Serial.printf("NTP-Get: y:%d m:%d d:%d h:%d m:%d S:%d\n", year(), month(), day(), hour(), minute(), second());
   Rtc.SetDateTime(current);
   RtcDateTime now = Rtc.GetDateTime();
   Serial.printf("Rtc-Get: y:%d m:%d d:%d h:%d m:%d S:%d\n", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second());
@@ -884,6 +885,7 @@ void setup()
   delay(200);
   noTone(Buzzer);
   getAPIData(RequestURL);
+  NtpUpdate();
 }
 
 void loop()
