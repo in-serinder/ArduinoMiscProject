@@ -638,13 +638,16 @@ void Relay_NO_swich(int sw, uint8_t pos)
     delay(200);
     noTone(Buzzer);
   }
+
+  // 同步
+  sync_relaystatusRtoE();
 }
 
 void WriteData(int sw, uint8_t pos)
 {
   EEPROM.write(pos, sw);
   EEPROM.commit();
-  Serial.println("Write: " + String(sw) + " Read: " + String(EEPROM.read(0)));
+  // Serial.println("Write: " + String(sw) + " Read: " + String(EEPROM.read(0)));
 }
 
 /*获取状态和写入状态*/
@@ -894,6 +897,7 @@ void loop()
 
   // 更新与计时器
   timecount++;
+  Serial.printf("\nTimeCount:%d\n", timecount);
   if (timecount % 5 == 0)
   {
 
@@ -1015,7 +1019,6 @@ void loop()
     pc.publish(DHT11_TOPIC, "~GET_HUM");
   }
 
-  sync_relaystatusRtoE();
   sync_relaystatusRtoIO();
 
   RtcDateTime now = Rtc.GetDateTime();
