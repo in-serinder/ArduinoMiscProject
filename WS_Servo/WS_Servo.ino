@@ -6,7 +6,7 @@
 #define ServoPWM D4
 
 const char *WIFI_SSID = "2.4GHZ";
-const char *WIFI_PASSWORD = "320724fuck";
+const char *WIFI_PASSWORD = "password";
 const uint8_t WS_PORT = 81;
 const uint16_t SERVO_ANGLE = 180;
 

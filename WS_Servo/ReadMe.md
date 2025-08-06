@@ -1,0 +1,14 @@
+# Esp8266 WebSocket Servo
+
+### arguments
+---
+> WIFI_SSID = "WiFi ssid";
+
+> WIFI_PASSWORD = "password";
+
+> WS_PORT = Port;
+
+> SERVO_ANGLE = SG[num*2];
+
+### Effect
+![image](image/debug.png)
