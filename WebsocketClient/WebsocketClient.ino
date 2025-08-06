@@ -8,18 +8,16 @@ const uint8_t *WS_PORT = 81
 
 
 
-WiFiClient wc;
-WebSocketsServer ws = WebSocketsServer(WS_PORT); //指定对象端口
+  WiFiClient wc;
+WebSocketsServer ws = WebSocketsServer(WS_PORT);  //指定对象端口
 
-void Wifi_connect()
-{
+void Wifi_connect() {
   int count = 0;
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.println("Connect to: \n\tSSID:" + String(WIFI_SSID) + "\n\tPassWord:" + String(WIFI_PASSWORD));
-  while (WiFi.status() != WL_CONNECTED)
-  {
+  while (WiFi.status() != WL_CONNECTED) {
     Serial.print('.');
     delay(1000);
     count++;
@@ -29,31 +27,30 @@ void Wifi_connect()
 }
 
 // 绑定事件函数
-void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length){
-  Serial.printf("Event Type : [%d]\n",type);
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
+  Serial.printf("Event Type : [%d]\n", type);
   // 事件处理
-  switch(type){
+  switch (type) {
     case WStype_CONNECTED:
-    Serial.println("Ws Connected\n");
-    break;
+      Serial.println("Ws Connected\n");
+      break;
     case WStype_DISCONNECTED:
-Serial.println("Ws Disconnected\n");
-
-    break;
+      Serial.println("Ws Disconnected\n");
+      break;
     case WStype_ERROR:
-    Serial.println("ws Error happen\n");
-    break;
+      Serial.println("ws Error happen\n");
+      break;
     case WStype_BIN:
-    Serial.printf("Got binary length:[%d]\n",length);
-    break;
+      Serial.printf("Got binary length:[%d]\n", length);
+      break;
     case WStype_TEXT:
-    Serial.printf("Got a Text Message [%s]\n",payload);
-    break;
+      Serial.printf("Got a Text Message [%s]\n", payload);
+      break;
     case WStype_PING:
-    break;
+      break;
     case WStype_PONG:
-    break;
-    default: Serial.printf("Undefine in case type [%d]\n",type);
+      break;
+    default: Serial.printf("Undefine in case type [%d]\n", type);
   }
 }
 
@@ -65,15 +62,13 @@ void setup() {
   Wifi_connect();
   ws.begin();
   ws.onEvent(webSocketEvent);
-
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if (WiFi.status()!=WL_CONNECTED) {
+  if (WiFi.status() != WL_CONNECTED) {
     Serial.print("WiFi Connect Lost,Reconnecting");
     Wifi_connect();
   }
   ws.loop();
-
 }
