@@ -7,3 +7,7 @@
 > WIFI_PASSWORD = "password";
 
 > WS_PORT = Port;
+
+
+### Effect
+![image](image/debug.png)
