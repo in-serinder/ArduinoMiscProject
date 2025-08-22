@@ -10,8 +10,8 @@
 #define DS_DATA D1
 #define DS_RST D2
 
-const char *WIFI_SSID = "SSID";
-const char *WIFI_PASSWORD = "PASSWORD";
+const char *WIFI_SSID = "2.4GHZ";
+const char *WIFI_PASSWORD = "320724fuck";
 const u32_t ZONE = 28800; // U8
 
 const char *NTP_SERVERS[] = {"ntp.pool.org",
@@ -24,14 +24,14 @@ RtcDS1302<ThreeWire> Rtc(Wire);
 
 IPAddress ip;
 WiFiUDP ntpUDP;
-NTPClient tc(ntpUDP, NTP_SERVERS[1], ZONE, 6000);
+NTPClient tc(ntpUDP, NTP_SERVERS[2], ZONE, 6000);
 
 void setup()
 {
   Serial.begin(9200);
-  WIFI_Connect();
-
-  tc.begin();
+  // WIFI_Connect();
+  digitalWrite(Relay, uint8_t val)
+  // tc.begin();
   Rtc.Begin();
 
   Rtc.SetIsWriteProtected(false);
@@ -40,12 +40,12 @@ void setup()
 
 void loop()
 {
-  tc.update();
-  Serial.println(tc.getFormattedTime());
-  setTime(tc.getEpochTime());
-  Serial.printf("NTP-Get: y:%d m:%d d:%d h:%d m:%d S:%d\n", year(), month(), day(), hour(), minute(), second());
-  RtcDateTime current = RtcDateTime(year(), month(), day(), hour(), minute(), second());
-  Rtc.SetDateTime(current);
+  // tc.update();
+  // Serial.println(tc.getFormattedTime());
+  // setTime(tc.getEpochTime());
+  // Serial.printf("NTP-Get: y:%d m:%d d:%d h:%d m:%d S:%d\n", year(), month(), day(), hour(), minute(), second());
+  // RtcDateTime current = RtcDateTime(year(), month(), day(), hour(), minute(), second());
+  // Rtc.SetDateTime(current);
   RtcDateTime now = Rtc.GetDateTime();
   Serial.printf("Rtc-Get: y:%d m:%d d:%d h:%d m:%d S:%d\n", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second());
 
