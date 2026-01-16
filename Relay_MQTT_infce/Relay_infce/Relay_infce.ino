@@ -7,15 +7,15 @@
 #define Relay 0
 #define LED 2
 
-const char *WIFI_SSID = "ssid";
-const char *WIFI_PASSWORD = "password";
+const char *WIFI_SSID = "2.4GHZ";
+const char *WIFI_PASSWORD = "320724fuck";
 
-const char *MQTT_SERVER_IP = "Server IP";
+const char *MQTT_SERVER_IP = "8.130.191.142";
 const int MQTT_PORT = 1883;
 const char *MQTT_USER = "Relay";
 const char *MQTT_PASSWORD = "password";
 
-const char *MQTT_TOPIC = "Relay/Server_Master";
+const char *MQTT_TOPIC = "Relay/ServerTop";
 
 WiFiClient wc;
 PubSubClient pc(wc);
