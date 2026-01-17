@@ -40,17 +40,24 @@ void MQTTCallBack(char *topic, byte *payload, unsigned int len) {
   Serial.println("Massage: " + str);
   // Main str -> Command
   if (str == "GET") {
-    pc.publish(MQTT_TOPIC, (">T" + String(dht.readTemperature()) + " H" + String(dht.readHumidity())).c_str());
+    float temp =dht.readTemperature();
+    while(isnan(temp)) {temp =dht.readTemperature();delay(2000);};
+
+    pc.publish(MQTT_TOPIC, (">T" + String(temp) + " H" + String(dht.readHumidity())).c_str());
     Serial.println("Command--" + str);
   }
 
   if (str == "GET_TEMP") {
-    pc.publish(MQTT_TOPIC, (">T" + String(dht.readTemperature())).c_str());
+    float temp =dht.readTemperature();
+    while(isnan(temp)) {temp =dht.readTemperature();delay(2000);};
+    pc.publish(MQTT_TOPIC, (">T" + String(temp)).c_str());
     Serial.println("Command--" + str);
   }
 
   if (str == "GET_HUM") {
-    pc.publish(MQTT_TOPIC, (">H" + String(dht.readHumidity())).c_str());
+    float hum =dht.readHumidity();
+    while(isnan(hum)) {hum =dht.readHumidity();delay(2000);};
+    pc.publish(MQTT_TOPIC, (">H" + String(hum)).c_str());
     Serial.println("Command--" + str);
   }
 
@@ -117,9 +124,12 @@ void loop() {
       pc.loop();
     }
   }
-  delay(2000);
+  delay(5000);
   float temp = dht.readTemperature();
-  float hum =dht.readHumidity();
-   pc.publish(MQTT_TOPIC, (">T" + String((temp<100&&temp>-50)?temp:0.0)).c_str());
-  pc.publish(MQTT_TOPIC, (">H" + String((hum<100&&hum>0)?hum:0.0)).c_str());
+  float hum = dht.readHumidity();
+  if (isnan(temp) || isnan(hum)) {
+    return;
+  }
+  pc.publish(MQTT_TOPIC, (">T" + String((temp < 100 && temp > -50) ? temp : 0.0)).c_str());
+  pc.publish(MQTT_TOPIC, (">H" + String((hum < 100 && hum > 0) ? hum : 0.0)).c_str());
 }
