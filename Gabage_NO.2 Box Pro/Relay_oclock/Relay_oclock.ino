@@ -50,7 +50,7 @@
 #define WEATHERUPDATEHOURSDELAY 1  //更新间隔(小时)
 
 const char *API_REQUESTURL = "http://59.82.43.66/v3/weather/weatherInfo?";
-const char *API_KEY = "key";
+const char *API_KEY = "apikey";
 const char *CITY_CODE = "citycode";
 
 // #define TM1637_CLK D6
@@ -215,7 +215,7 @@ const String Chinese_index[CHINESEARRLEN] = { "晴", "云", "风", "阴", "雨",
 
 const String Symbol_index[3] = { "℃", "℉", "≤" };
 
-uint8_t celsiusChar[8] = { 0x07, 0x05, 0x07, 0x00, 0x1C, 0x22, 0x1C, 0x00 };
+uint8_t celsiusChar[8] = {0x00, 0x4C, 0x52, 0x20, 0x20, 0x20, 0x1C, 0x00};;
 uint8_t smileyChar[8] = { 0x00, 0x00, 0x0A, 0x00, 0x00, 0x11, 0x0E, 0x00 };
 uint8_t crySimpleChar[8] = { 0x00, 0x00, 0x0A, 0x00, 0x0E, 0x11, 0x00, 0x00 };
 
@@ -549,6 +549,10 @@ void initialization() {
   lcd.createChar(0, celsiusChar);
   lcd.createChar(1, smileyChar);
   lcd.createChar(2, crySimpleChar);
+
+    lcd.setCursor(0, 1);
+
+  lcd.printf("initialization");
 }
 
 void setzero() {
@@ -560,14 +564,14 @@ void setzero() {
 String getWeek() {
   RtcDateTime now = Rtc.GetDateTime();
   switch (now.DayOfWeek()) {
-    case 1: return "SUN"; break;
-    case 2: return "MON"; break;
-    case 3: return "WED"; break;
-    case 4: return "THU"; break;
-    case 5: return "FRI"; break;
-    case 6: return "SAT"; break;
-    case 7: return "SUN"; break;
-    default: return "UNK"; break;
+        case 0: return "SUN"; 
+        case 1: return "MON"; 
+        case 2: return "TUE"; 
+        case 3: return "WED";
+        case 4: return "THU"; 
+        case 5: return "FRI";
+        case 6: return "SAT"; 
+        default: return "UNK"; 
   }
 }
 
@@ -754,11 +758,11 @@ void loop() {
 
   lcd.clear();
   lcd.setCursor(0, 0);
+  dateAVBPOS =0;
   if (now.Hour() < 10) dateAVBPOS++;
   if (now.Minute() < 10) dateAVBPOS++;
   if (now.Month() < 10) dateAVBPOS++;
   if (now.Day() < 10) dateAVBPOS++;
-  if (now.Hour() < 10) dateAVBPOS++;
   if (dateAVBPOS > 2) {
     lcd.printf("%d-%d-%d %d:%d:%d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second());
   } else {
@@ -772,6 +776,8 @@ void loop() {
 
   if ((now.Hour() < 16 && now.Hour() > 8) && !blforce) {
     lcd.noBacklight();
+  }else{
+    lcd.backlight();
   }
 
   dot = !dot;
@@ -794,9 +800,11 @@ void loop() {
     lcd.printByte(2);
   }
   // 强制背光
-  if (digitalRead(BackLightForce)) {
+  if (digitalRead(BackLightForce)==1) {
     blforce = true;
     lcd.backlight();
+  }else{
+    blforce =false;
   }
   delay(1000);
 }
