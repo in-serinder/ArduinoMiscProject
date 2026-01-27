@@ -102,6 +102,7 @@ void setup() {
   pinMode(DHTpin, OUTPUT);
   pinMode(LED, OUTPUT);
   Serial.begin(9600);
+  dht.begin();
 
   pc.setServer(MQTT_SERVER_IP, MQTT_PORT);
   Wifi_connect();
