@@ -34,7 +34,7 @@
 #define DS_DATA D4
 #define DS_RST D5
 
-#define BackLightForce D1
+#define BackLightForce D0
 #define Buzzer D2  //替换为
 
 #define OLED_ADDR 0x3C
@@ -50,8 +50,8 @@
 #define WEATHERUPDATEHOURSDELAY 1  //更新间隔(小时)
 
 const char *API_REQUESTURL = "http://59.82.43.66/v3/weather/weatherInfo?";
-const char *API_KEY = "apikey";
-const char *CITY_CODE = "citycode";
+const char *API_KEY = "key";
+const char *CITY_CODE = "code";
 
 // #define TM1637_CLK D6
 // #define TM1637_DIO D7
@@ -59,7 +59,7 @@ const char *CITY_CODE = "citycode";
 // #define Buzzer D8
 
 const char *WIFI_SSID = "2.4GHZ";
-const char *WIFI_PASSWORD = "pwd";
+const char *WIFI_PASSWORD = "ped";
 
 const char *MQTT_SERVER_IP = "broker";
 const int MQTT_PORT = 1883;
@@ -215,7 +215,8 @@ const String Chinese_index[CHINESEARRLEN] = { "晴", "云", "风", "阴", "雨",
 
 const String Symbol_index[3] = { "℃", "℉", "≤" };
 
-uint8_t celsiusChar[8] = {0x00, 0x4C, 0x52, 0x20, 0x20, 0x20, 0x1C, 0x00};;
+uint8_t celsiusChar[8] = { 0x00, 0x4C, 0x52, 0x20, 0x20, 0x20, 0x1C, 0x00 };
+;
 uint8_t smileyChar[8] = { 0x00, 0x00, 0x0A, 0x00, 0x00, 0x11, 0x0E, 0x00 };
 uint8_t crySimpleChar[8] = { 0x00, 0x00, 0x0A, 0x00, 0x0E, 0x11, 0x00, 0x00 };
 
@@ -273,7 +274,7 @@ void MQTTCallBack(char *topic, byte *payload, unsigned int len) {
 
 
   for (unsigned int i = 0; i < len; i++) {
-    msg += (char)payload[i];  
+    msg += (char)payload[i];
   }
 
   Serial.println("\n------------------------");
@@ -281,35 +282,35 @@ void MQTTCallBack(char *topic, byte *payload, unsigned int len) {
   Serial.println("Topic: " + String(topic));
 
 
-  if (msg.length() > 2 && msg[0] == '>') { 
+  if (msg.length() > 2 && msg[0] == '>') {
     tempMessage = true;
 
     istemperature = (msg[1] == 'T') ? true : false;
 
-    String valueStr = msg.substring(2);  
-    dhtvalue = atof(valueStr.c_str());   
+    String valueStr = msg.substring(2);
+    dhtvalue = atof(valueStr.c_str());
 
-    Serial.println("Parsed Value: " + String(dhtvalue, 1));  
+    Serial.println("Parsed Value: " + String(dhtvalue, 1));
   } else {
     tempMessage = false;
     dhtvalue = 0.0;
   }
 
-//（错误值253
+  //（错误值253
   if (istemperature) {
-    if (dhtvalue >= 253) {  
+    if (dhtvalue >= 253) {
       pc.publish(DHT11_TOPIC, "~GET_TEMP");
       Serial.println("Temp read error, request new data");
     } else {
-      temperature = dhtvalue == 0 ? temperature :dhtvalue; 
+      temperature = dhtvalue == 0 ? temperature : dhtvalue;
       Serial.println("Updated Temperature: " + String(temperature, 1));
     }
   } else {
-    if (dhtvalue >= 253) { 
+    if (dhtvalue >= 253) {
       pc.publish(DHT11_TOPIC, "~GET_HUM");
       Serial.println("Hum read error, request new data");
     } else {
-      humidity = dhtvalue==0?humidity : dhtvalue;  
+      humidity = dhtvalue == 0 ? humidity : dhtvalue;
       Serial.println("Updated Humidity: " + String(humidity, 1));
     }
   }
@@ -422,6 +423,14 @@ uint8_t getMapArr_index(String ch, const String arr[], uint8_t arrSize, bool isc
 
 void getAPIData(String url) {
   Serial.println(url);
+
+  memset(weather_statusindexarr, 0, sizeof(weather_statusindexarr));
+  memset(weather_directionarr, 0, sizeof(weather_directionarr));
+
+  // Weather_WindDirection = "";
+
+
+
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
     Serial.println("http begin");
@@ -550,7 +559,7 @@ void initialization() {
   lcd.createChar(1, smileyChar);
   lcd.createChar(2, crySimpleChar);
 
-    lcd.setCursor(0, 1);
+  lcd.setCursor(0, 1);
 
   lcd.printf("initialization");
 }
@@ -564,14 +573,14 @@ void setzero() {
 String getWeek() {
   RtcDateTime now = Rtc.GetDateTime();
   switch (now.DayOfWeek()) {
-        case 0: return "SUN"; 
-        case 1: return "MON"; 
-        case 2: return "TUE"; 
-        case 3: return "WED";
-        case 4: return "THU"; 
-        case 5: return "FRI";
-        case 6: return "SAT"; 
-        default: return "UNK"; 
+    case 0: return "SUN";
+    case 1: return "MON";
+    case 2: return "TUE";
+    case 3: return "WED";
+    case 4: return "THU";
+    case 5: return "FRI";
+    case 6: return "SAT";
+    default: return "UNK";
   }
 }
 
@@ -638,6 +647,7 @@ void loop() {
 
   if (timecount >= 3600 * WEATHERUPDATEHOURSDELAY) {
     timecount = 0;
+    // 获取天气
     getAPIData(RequestURL);
   }
 
@@ -653,9 +663,10 @@ void loop() {
     displayDrawCharacter(2, 15, Weather_IconArr[10]);
     display.setCursor(22, 20);
     display.printf("Weather:");
+    // 天气汉字绘制
     for (uint8_t i = 0; i < WEATHERTEXTLEN; i++) {
       if (weather_statusindexarr[i] < CHINESEARRLEN) {
-        if (weather_statusindexarr[i] == weather_statusindexarr[i + 1]) i++;
+        if(weather_statusindexarr[i] == weather_statusindexarr[i + 1]) break; //避免重复
         displayDrawCharacter(70 + (i * 18), 15, Chinese_Arr[weather_statusindexarr[i]]);
       }
     }
@@ -695,7 +706,7 @@ void loop() {
     display.printf("Wind.D:");
     for (uint8_t i = 0; i < 4; i++) {
       if (weather_directionarr[i] < CHINESEARRLEN) {
-        if (weather_directionarr[i] == weather_directionarr[i + 1]) i++;
+        if (weather_directionarr[i] == weather_directionarr[i + 1]) break;
         displayDrawCharacter(65 + (i * 18), 33, Chinese_Arr[weather_directionarr[i]]);
       }
     }
@@ -758,7 +769,7 @@ void loop() {
 
   lcd.clear();
   lcd.setCursor(0, 0);
-  dateAVBPOS =0;
+  dateAVBPOS = 0;
   if (now.Hour() < 10) dateAVBPOS++;
   if (now.Minute() < 10) dateAVBPOS++;
   if (now.Month() < 10) dateAVBPOS++;
@@ -776,7 +787,7 @@ void loop() {
 
   if ((now.Hour() < 16 && now.Hour() > 8) && !blforce) {
     lcd.noBacklight();
-  }else{
+  } else {
     lcd.backlight();
   }
 
@@ -790,8 +801,8 @@ void loop() {
 
   Serial.println(humidity);
   // 舒适区判
-  if (temperature >= 22.0 && temperature <= 26.0) {
-    if (humidity >= 40.0 && humidity <= 60.0) {
+  if (temperature >= 20.0 && temperature <= 30.0) {
+    if (humidity >= 40.0 && humidity <= 65.0) {
       lcd.setCursor(15, 1);
       lcd.printByte(1);
     }
@@ -800,11 +811,11 @@ void loop() {
     lcd.printByte(2);
   }
   // 强制背光
-  if (digitalRead(BackLightForce)==1) {
+  if (digitalRead(BackLightForce) == 1) {
     blforce = true;
     lcd.backlight();
-  }else{
-    blforce =false;
+  } else {
+    blforce = false;
   }
   delay(1000);
 }
