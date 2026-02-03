@@ -50,7 +50,7 @@
 #define WEATHERUPDATEHOURSDELAY 1  //更新间隔(小时)
 
 const char *API_REQUESTURL = "http://59.82.43.66/v3/weather/weatherInfo?";
-const char *API_KEY = "key";
+const char *API_KEY = "apikey";
 const char *CITY_CODE = "code";
 
 // #define TM1637_CLK D6
@@ -59,7 +59,7 @@ const char *CITY_CODE = "code";
 // #define Buzzer D8
 
 const char *WIFI_SSID = "2.4GHZ";
-const char *WIFI_PASSWORD = "ped";
+const char *WIFI_PASSWORD = "pwd";
 
 const char *MQTT_SERVER_IP = "broker";
 const int MQTT_PORT = 1883;
@@ -666,7 +666,7 @@ void loop() {
     // 天气汉字绘制
     for (uint8_t i = 0; i < WEATHERTEXTLEN; i++) {
       if (weather_statusindexarr[i] < CHINESEARRLEN) {
-        if(weather_statusindexarr[i] == weather_statusindexarr[i + 1]) break; //避免重复
+        if((weather_statusindexarr[i] == weather_statusindexarr[i + 1])&&(i!=0)) break; //避免重复
         displayDrawCharacter(70 + (i * 18), 15, Chinese_Arr[weather_statusindexarr[i]]);
       }
     }
@@ -706,7 +706,7 @@ void loop() {
     display.printf("Wind.D:");
     for (uint8_t i = 0; i < 4; i++) {
       if (weather_directionarr[i] < CHINESEARRLEN) {
-        if (weather_directionarr[i] == weather_directionarr[i + 1]) break;
+        if ((weather_directionarr[i] == weather_directionarr[i + 1])&&(i!=0)) break;
         displayDrawCharacter(65 + (i * 18), 33, Chinese_Arr[weather_directionarr[i]]);
       }
     }
