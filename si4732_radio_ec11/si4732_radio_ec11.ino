@@ -141,7 +141,8 @@ void loop() {
   // LW 153-279 khz
   switch(BandFlag){
     case 0: si4732.setFM(6400, 10800, 10390, 10);
-    case 1: si4732.setSSB();
+    case 1: si4732.setSSB(1730, 30000, 14270, 1,AM_FUNCTION);
+    case 2: si4732.setAM(153, 279, 180, 1);
   }
 
 }
