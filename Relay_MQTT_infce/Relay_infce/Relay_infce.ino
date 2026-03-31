@@ -15,7 +15,7 @@ const int MQTT_PORT = 1883;
 const char *MQTT_USER = "Relay";
 const char *MQTT_PASSWORD = "password";
 
-const char *MQTT_TOPIC = "Relay/ServerTop";
+const char *MQTT_TOPIC = "Relay/RelayEA";
 
 WiFiClient wc;
 PubSubClient pc(wc);
