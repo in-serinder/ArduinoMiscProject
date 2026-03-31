@@ -8,10 +8,10 @@
 #define OLED_WIDTH 128
 #define OLED_HEIGHT 32
 
-#define SCL D5
-#define SDA D6
+#define SCL 22
+#define SDA 21
 
-#define DHT D0
+#define DHT 4
 DHT11 dht11(DHT);
 
 Adafruit_SSD1306 display(OLED_WIDTH, OLED_HEIGHT, &Wire, -1);
